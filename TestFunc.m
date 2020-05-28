@@ -1,5 +1,7 @@
 clear all, clc
 
+tic
+
 x1=[4;4]; x2=[5;6]; x3=[7;3]; x4=[10;4]; x5=[20;4];
 WayPoints=[x1,x2,x3,x4,x5]';
 Times=[2,.4,.5,3];
@@ -14,7 +16,7 @@ for i=1:length(WayPoints)-1
 end
 scatter(WayPoints(:,1),WayPoints(:,2))
 
-
+toc
 
 
 
