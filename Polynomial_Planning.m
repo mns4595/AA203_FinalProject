@@ -25,35 +25,62 @@ clear
 close all
 clc
 
+% RRT* solver setup
+addpath('rrt_toolbox-master');
+
+grid_size = 10;
+
+map = struct('name', 'poly_world.mat', 'start_point', [0.5 0.5], 'goal_point', [9 16]);
+max_iter =  2000;
+is_benchmark = false;
+rand_seed = 40;
+variant = 'FNSimple2D';
+
 % (May 27 02:13) Currently the grid and obstacle setup occurs in the python
 % file, however, we can potentially make the matrix here, save it to a .txt
 % and read it on python to maintain all of our setup in one place.
 
 
-%% Run Python code to obtain waypoints
-%-------------------------------------------------------------------------%
-% Python Dependencies: Python 3.8, NumPy, and Matplotlib                  %
-%-------------------------------------------------------------------------%
+% %% Run Python code to obtain waypoints
+% %-------------------------------------------------------------------------%
+% % Python Dependencies: Python 3.8, NumPy, and Matplotlib                  %
+% %-------------------------------------------------------------------------%
+% 
+% % Marco's Directory:
+% commandStr = 'python "X:\Marco\Documents\Stanford\Classes\Spring 2020\AA 203 - Optimal Controls\Final Project\AA203_FinalProject\solve_rrt_star.py"';
+% 
+% % Tom's Directory:
+% % commandStr = 
+% 
+% % Wills' Directory
+% % commandStr = 
+% 
+% [status, commandOut] = system(commandStr);
+% 
+% if status ~= 0
+%     error('PYTHON EXECUTION FAILED')
+% end
+% 
+% % Import Waypoints from resulting text file:
+% 
+% waypoints = readmatrix('RRTs_waypoints.txt');   % TODO: (May 27 02:05) Current points are placeholders. RRT* Optimization in the works
 
-% Marco's Directory:
-commandStr = 'python "X:\Marco\Documents\Stanford\Classes\Spring 2020\AA 203 - Optimal Controls\Final Project\AA203_FinalProject\solve_rrt_star.py"';
+%% Matlab RRT* Waypoints
 
-% Tom's Directory:
-% commandStr = 
+result = rrt_star(map, max_iter, is_benchmark, rand_seed, variant);
+path_idx = result.getResultantPath();
+path = zeros(length(path_idx), 2);
+path(:,1) = result.tree(1,path_idx);
+path(:,2) = result.tree(2,path_idx);
 
-% Wills' Directory
-% commandStr = 
-
-[status, commandOut] = system(commandStr);
-
-if status ~= 0
-    error('PYTHON EXECUTION FAILED')
-end
-
-% Import Waypoints from resulting text file:
-
-waypoints = readmatrix('RRTs_waypoints.txt');   % TODO: (May 27 02:05) Current points are placeholders. RRT* Optimization in the works
-
+% success = false;
+% while ~success
+%     success = true;
+%     n = length(path(:,1));
+%     for i = 2:n-1
+%         
+%     end
+% end
 
 %% Polynomial Fit
 
