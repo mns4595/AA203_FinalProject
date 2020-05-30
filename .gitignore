@@ -1,0 +1,2 @@
+# Ignore Matlab generated .asv files
+*.asv
