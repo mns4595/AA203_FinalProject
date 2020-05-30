@@ -269,6 +269,9 @@ classdef FNSimple2D < handle
                 end
             end
 
+            collision = false;
+
+
 
                 function b = ccw(A, B, C)
                     v1 = B - A;
@@ -713,7 +716,7 @@ classdef FNSimple2D < handle
                 current_index = this.parent(current_index);
             end
             backtrace_path(path_iter) = current_index;
-%             close all;
+            close all;
             figure;
             set(gcf(), 'Renderer', 'opengl');
             hold on;

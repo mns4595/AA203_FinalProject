@@ -1,4 +1,4 @@
-%% AA 203 - Optimal and Learning Based Controls: Final Project
+%% AA 203 Final Project
 %
 %-------------------------------------------------------------------------%
 % This MATLAB Script intends to reproduce the results obtained from the
@@ -17,10 +17,6 @@
 %              Stanford University                                        %
 %                                                                         %
 %-------------------------------------------------------------------------%
-% rrt-toolbox was used in order to solve for RRT*. Some functions and     %
-% classes were modified to improve collision checking and solution finding%
-%-------------------------------------------------------------------------%
-
 
 %% Setup
 clear

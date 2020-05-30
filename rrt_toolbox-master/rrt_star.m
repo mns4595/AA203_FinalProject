@@ -1,4 +1,4 @@
-function problem = rrt_star(map, max_iter, is_benchmark, rand_seed, variant)
+function problem = rrt_star(map, max_iter, is_benchmark, rand_seed, variant, test)
 %RRT_STAR -- RRT* is sampling-based algorithm, solves 
 % the problem of motion and path planning providing feasible solutions
 % taking into account the optimality of a path/motion.
@@ -121,7 +121,5 @@ if (is_benchmark)
     
 %     problem.plot();
 %     saveas(gcf, [dir_name '\' ALGORITHM '_' MAP.name '_' num2str(MAX_NODES) '_of_' num2str(MAX_ITER) '_' datestr(now, 'HH-MM-SS') '.fig']);
-else
-    problem.plot();
 end
 
