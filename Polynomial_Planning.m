@@ -46,6 +46,7 @@ variant = 'FNSimple2D';
 
 %% Matlab RRT* Waypoints
 
+polyOrder = 1;
 result = rrt_star(map, max_iter, is_benchmark, rand_seed, variant);
 path_idx = result.getResultantPath();
 waypoints = zeros(length(path_idx), 2);
@@ -73,30 +74,39 @@ end
 
 %% Test - Visualize RRT* Solution & Obstacles with Refined Waypoints
 if test
-    
 %     result.plot() %This takes ~5-10sec to render. Displays total cost too
-    
-    figure('Renderer', 'painters', 'Position', [1920/2 50 1920/3 900])
-    for i = 1: length(obstacles)
-        fill(obstacles{i}(:,1), obstacles{i}(:,2), 'k')
-        hold on
-    end
-    goal = fill([8 8 10 10 8], [16 18 18 16 16], 'g');
-    set(goal, 'facealpha', 0.5)
-    set(goal, 'edgealpha', 0)
-
-    plot(waypoints(:,1), waypoints(:,2))
-    scatter(waypoints(:,1), waypoints(:,2), 'linewidth', 1)
-    xlim([0 10])
-    ylim([0 18])
-    
+    PlotTrajectory(waypoints, obstacles, polyOrder)    
 end
 
-%% Polynomial Fit
+%% Initial Polynomial Fit
 
+% initial_times=[2,.4,.5,3];
+% Sets large time estimates for initial 
+initial_times = ones(1,length(waypoints)) * 4;
+total_time = sum(initial_times);
+polyOrder = 9;
+[xCoeff,yCoeff,xTraj,yTraj,cost] = TrajOpt(waypoints,initial_times,polyOrder);
+PlotTrajectory(waypoints, obstacles, polyOrder, xTraj, yTraj)
 
-
-
-
+iteration = 1;
+while iteration <= 100 %% Need to add error constraint
+    iteration  = iteration + 1;
+    %% Time Optimization
+    % Minimize segment times to minimize snap
+    %%%%%%%%%%%%%%%% TO DO  %%%%%%%%%%%%%%%%%%%%%%
+    
+    
+    %% Collision Check
+    % Use collision_free to ensure no trajectory points overlap the
+    % obstacle regions
+    %%%%%%%%%%%%%%%% TO DO  %%%%%%%%%%%%%%%%%%%%%%
+    
+    %% Update Times to Meet Actuator Constraints
+    % With times optimized and no collisions, times are increased to the
+    % step greater than the limit where a constraint is hit or decreased
+    % until a constraint is hit and reverted back by one step.
+    %%%%%%%%%%%%%%%% TO DO  %%%%%%%%%%%%%%%%%%%%%%
+    
+end
 
 
