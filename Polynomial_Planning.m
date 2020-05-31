@@ -91,7 +91,8 @@ while iteration <= 10 && new_waypoint_exists%% Need to add error constraint
     
     %% Time Optimization
     % Sets large time estimates for initial
-    initial_times = ones(1,length(waypoints)) * 4;
+    waypoint_deltas = diff(waypoints);
+    initial_times = sqrt(waypoint_deltas(:,1).^2 + waypoint_deltas(:,2).^2);
     % Minimize segment times to minimize snap
     
     %%%%%%%%%%%%%%%% TO DO: Finish Optimize_Time_Ratio  %%%%%%%%%%%%%%%%%%
