@@ -14,7 +14,7 @@ if polyOrder == 1
     plot(waypoints(:,1), waypoints(:,2))
     scatter(waypoints(:,1), waypoints(:,2), 'linewidth', 1)
 else
-    title('A plot of the polynomial trajectory with polynomial order ' + string(polyOrder))
+    title('A plot of the polynomial trajectory with segments having polynomial order ' + string(polyOrder))
     for i=1:length(waypoints)-1
         plot(xTraj{i},yTraj{i})
         hold on
