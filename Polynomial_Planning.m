@@ -101,7 +101,7 @@ while iteration <= 10 && new_waypoint_exists%% Need to add error constraint
     initial_times = sqrt(waypoint_deltas(:,1).^2 + waypoint_deltas(:,2).^2);
     % Minimize segment times to minimize snap
     
-    [new_times, xTraj, yTraj, cost_iteration_array] = Optimize_Time_Ratio(waypoints, initial_times, polyOrder, K_t);
+    [new_times, xTraj, yTraj, optimization_history] = Optimize_Time_Ratio(waypoints, initial_times, polyOrder, K_t);
 
     if test
         % Plots trajectory of each update when testing
@@ -138,8 +138,16 @@ while iteration <= 10 && new_waypoint_exists%% Need to add error constraint
     % step greater than the limit where a constraint is hit or decreased
     % until a constraint is hit and reverted back by one step.
     
-    %%%%%%%%%%%%%%%% TO DO  %%%%%%%%%%%%%%%%%%%%%%
-    final_times = Constrain_Times_For_Actuator(new_times);
+    %%% NOT IMPLEMENTED because we're verifying the ratio optimization %%%
+    % If this were to be used for a particular quadrotor, the time segments
+    % would be used to calculate the thrust required from the rotors to
+    % achieve the desired physics. Given that, the segment requiring the
+    % maximum thrust would be shortened until it hit the constraint, which
+    % would then be used as a scaling factor to maintain the segment ratios
+    % while minimizing overall time. 
+
+    % As we don't have a particular quadrotor to examine, this is saved for
+    % future work to allow us to focus on the ratio optimization.
     
 end
 toc
