@@ -135,11 +135,13 @@ elseif optimization_method == 2
     disp('Iteration ' + string(iterations) + ' complete');
 
 end
-
+disp('The initial guess of times for this optimization were: ');
+disp(initial_times')
+disp('The initial total time was ' + string(sum(initial_times)) + 's');
 disp('The final set of times for this optimization are: ');
-disp(final_times);
+disp(final_times');
 disp('These times sum to a total time of: ');
-disp(sum(final_times));
+disp('The initial total time was ' + string(sum(final_times)) + 's');
 disp('The cost of the final trajectory is: ');
 disp(final_cost);
 
