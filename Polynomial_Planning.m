@@ -39,8 +39,8 @@ load('obstacles');
 
 grid_size = 10;
 
-map = struct('name', 'poly_world2.mat', 'start_point', [0.5 0.5], 'goal_point', [9 16]);
-max_iter =  2600;
+map = struct('name', 'poly_world2.mat', 'start_point', [0.5 0.5], 'goal_point', [8 16]);
+max_iter =  3000;
 is_benchmark = false;
 rand_seed = 200;
 variant = 'FNSimple2D';
