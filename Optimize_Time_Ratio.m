@@ -156,8 +156,7 @@ disp(initial_times')
 disp('The initial total time was ' + string(sum(initial_times)) + 's');
 disp('The final set of times for this optimization are: ');
 disp(final_times');
-disp('These times sum to a total time of: ');
-disp('The initial total time was ' + string(sum(final_times)) + 's');
+disp('The final total time was ' + string(sum(final_times)) + 's');
 disp('The cost of the final trajectory is: ');
 disp(final_cost);
 
