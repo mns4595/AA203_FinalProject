@@ -148,7 +148,7 @@ while iteration <= 10 && new_waypoint_exists%% Need to add error constraint
 
     % As we don't have a particular quadrotor to examine, this is saved for
     % future work to allow us to focus on the ratio optimization.
-    
+    final_times = new_times;
 end
 toc
 % Output the final results
