@@ -31,6 +31,8 @@ clc
 test = true;
 % test = false;
 
+tic 
+
 % RRT* solver setup
 addpath('rrt_toolbox-master');
 load('obstacles');
@@ -90,15 +92,19 @@ while iteration <= 10 && new_waypoint_exists%% Need to add error constraint
     new_waypoint_exists = false; % If this is not changed, loop will end with this pass
     
     %% Time Optimization
+    % Set the time cost scalar to balance the cost of snap with the cost of
+    % time
+    K_t = 500;
+    
     % Sets large time estimates for initial
     waypoint_deltas = diff(waypoints);
     initial_times = sqrt(waypoint_deltas(:,1).^2 + waypoint_deltas(:,2).^2);
     % Minimize segment times to minimize snap
     
-    %%%%%%%%%%%%%%%% TO DO: Finish Optimize_Time_Ratio  %%%%%%%%%%%%%%%%%%
-    % Outputs the Trajectories and time ratios for later use
-    [new_times, xTraj, yTraj] = Optimize_Time_Ratio(waypoints, initial_times, polyOrder);
+    [new_times, xTraj, yTraj, cost_iteration_array] = Optimize_Time_Ratio(waypoints, initial_times, polyOrder, K_t);
+
     if test
+        % Plots trajectory of each update when testing
         PlotTrajectory(waypoints, obstacles, polyOrder, xTraj, yTraj);
     end
     
@@ -136,7 +142,8 @@ while iteration <= 10 && new_waypoint_exists%% Need to add error constraint
     final_times = Constrain_Times_For_Actuator(new_times);
     
 end
-
+toc
 % Output the final results
 [xCoeff,yCoeff,xTraj,yTraj,cost] = TrajOpt(waypoints,final_times,polyOrder);
 PlotTrajectory(waypoints, obstacles, polyOrder, xTraj, yTraj);
+disp('The optimization required ' + string(iteration) + ' iterations.')

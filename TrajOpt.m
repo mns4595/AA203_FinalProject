@@ -175,6 +175,10 @@ end
 
 cost=coeff'*Q*coeff;
 
+
+
+
+
 end
 
 
