@@ -20,6 +20,22 @@ else
         hold on
     end
     scatter(waypoints(:,1),waypoints(:,2))
+    
+    %% Scatter of trajectory points to show quadrotor speed
+    figure('Renderer', 'painters', 'Position', [1920/2 50 1920/3 900])
+    for i = 1: length(obstacles)
+        fill(obstacles{i}(:,1), obstacles{i}(:,2), 'k')
+        hold on
+    end
+    goal = fill([8 8 10 10 8], [16 18 18 16 16], 'g');
+    set(goal, 'facealpha', 0.5)
+    set(goal, 'edgealpha', 0)
+    title('A plot of the discrete trajectory with using polynomial order ' + string(polyOrder))
+    for i=1:length(waypoints)-1
+        scatter(xTraj{i},yTraj{i})
+        hold on
+    end
+    scatter(waypoints(:,1),waypoints(:,2))
 end
 
 xlim([0 10])
