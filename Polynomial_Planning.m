@@ -94,11 +94,12 @@ while iteration <= 10 && new_waypoint_exists%% Need to add error constraint
     %% Time Optimization
     % Set the time cost scalar to balance the cost of snap with the cost of
     % time
-    K_t = 500;
+    K_t = 5000;
     
     % Sets large time estimates for initial
     waypoint_deltas = diff(waypoints);
     initial_times = sqrt(waypoint_deltas(:,1).^2 + waypoint_deltas(:,2).^2);
+%     initial_times = ones(length(waypoint_deltas),1);
     % Minimize segment times to minimize snap
     
     [new_times, xTraj, yTraj, optimization_history] = Optimize_Time_Ratio(waypoints, initial_times, polyOrder, K_t);
