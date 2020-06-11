@@ -18,6 +18,7 @@ classdef FNSimple2D < handle
         best_path_node      % The index of last node of the best path
         goal_reached
         max_nodes 
+        turning_radius      % The radius for Dubin's car implementation
         %%% Binning for faster neighbor search
         % bins are square
         bin_size
@@ -207,6 +208,19 @@ classdef FNSimple2D < handle
             node_index = nbors(this.index(1));
         end
         
+        function node_index = poly_nearest(this, new_node_position, deg)
+            min = inf;
+            
+            for i = 1:length(this.tree(1,:))
+                dist = arcLength(this.tree(:, i), new_node_position, i, deg);
+                
+                if dist < min
+                    min = dist;
+                    node_index = i;
+                end
+            end
+        end
+        
         function position = steer(this, nearest_node, new_node_position)
             % if new node is very distant from the nearest node we go from the nearest node in the direction of a new node
             if(norm(new_node_position - this.tree(:, nearest_node)) > this.max_step)
@@ -217,6 +231,26 @@ classdef FNSimple2D < handle
             else
                 position = new_node_position;
             end
+        end
+        
+        function position = poly_steer(this, nearest_node, new_node_position, deg)
+            temp_length = arcLength(nearest_node, new_node_position, deg);
+            
+            % if new node is very distant from the nearest node we go from the nearest node in the direction of a new node
+            if(temp_length > this.max_step)
+                poly_path = poly_sample(nearest_node, new_node_position, deg);
+                position = poly_path(:,1);
+            else
+                position = new_node_position;
+            end
+        end
+        
+        function poly_path = poly_sample(this, nearest_node, new_node_position, deg)
+            
+        end
+        
+        function s = arcLength(this, x1, x2, index, deg)
+            
         end
         
         function load_map(this, map_name)

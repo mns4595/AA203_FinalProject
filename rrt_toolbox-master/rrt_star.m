@@ -1,4 +1,4 @@
-function problem = rrt_star(map, max_iter, is_benchmark, rand_seed, variant, test)
+function problem = rrt_star(map, max_iter, is_benchmark, rand_seed, variant, poly_steer)
 %RRT_STAR -- RRT* is sampling-based algorithm, solves 
 % the problem of motion and path planning providing feasible solutions
 % taking into account the optimality of a path/motion.
@@ -81,10 +81,19 @@ end
 disp(ALGORITHM);
 % starting timer
 tic;
+if poly_steer
+    deg = 4;    % Degree of polynomial for steering
+end
 for ind = 1:MAX_ITER
     new_node = problem.sample();
-    nearest_node_ind = problem.nearest(new_node);
-    new_node = problem.steer(nearest_node_ind, new_node);   % if new node is very distant from the nearest node we go from the nearest node in the direction of a new node
+    if poly_steer
+        nearest_node_ind = problem.poly_nearest(new_node, deg);
+        new_node = problem.poly_steer(nearest_node_ind, new_node, deg);   % if new node is very distant from the nearest node we go from the nearest node in the direction of a new node
+    else
+        nearest_node_ind = problem.nearest(new_node);
+        new_node = problem.steer(nearest_node_ind, new_node);   % if new node is very distant from the nearest node we go from the nearest node in the direction of a new node
+    end
+   
     if(~problem.obstacle_collision(new_node, nearest_node_ind))
         neighbors = problem.neighbors(new_node, nearest_node_ind);
         min_node_ind = problem.chooseParent(neighbors, nearest_node_ind, new_node);

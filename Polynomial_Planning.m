@@ -44,12 +44,12 @@ max_iter =  3000;
 is_benchmark = false;
 rand_seed = 200;
 variant = 'FNSimple2D';
-
+poly_steer = false;
 
 %% Matlab RRT* Waypoints
 
 polyOrder = 1;
-result = rrt_star(map, max_iter, is_benchmark, rand_seed, variant);
+result = rrt_star(map, max_iter, is_benchmark, rand_seed, variant, poly_steer);
 path_idx = result.getResultantPath();
 waypoints = zeros(length(path_idx), 2);
 waypoints(:,1) = result.tree(1,path_idx);
@@ -77,8 +77,15 @@ RRT_star_waypoints = waypoints;
 
 %% Test - Visualize RRT* Solution & Obstacles with Refined Waypoints
 if test
-    %     result.plot() %This takes ~5-10sec to render. Displays total cost too
+    result.plot() %This takes ~5-10sec to render. Displays total cost too
     PlotTrajectory(waypoints, obstacles, polyOrder)
+end
+
+%% Polynomial Steer Function
+poly_steer = true;
+
+if poly_steer
+    result = rrt_star(map, max_iter, is_benchmark, rand_seed, variant, poly_steer);
 end
 
 %% Initial Polynomial Fit
