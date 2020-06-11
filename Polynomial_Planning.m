@@ -85,7 +85,7 @@ end
 poly_steer = true;
 
 if poly_steer
-    result = rrt_star(map, max_iter, is_benchmark, rand_seed, variant, poly_steer);
+    result_poly = rrt_star(map, max_iter, is_benchmark, rand_seed, variant, poly_steer);
 end
 
 %% Initial Polynomial Fit
