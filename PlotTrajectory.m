@@ -11,8 +11,10 @@ set(goal, 'edgealpha', 0)
 
 if polyOrder == 1
     title('A plot of the straight-line trajectory output from RRT*')
-    plot(waypoints(:,1), waypoints(:,2))
-    scatter(waypoints(:,1), waypoints(:,2), 'linewidth', 3)
+    plot(waypoints(:,1), waypoints(:,2), 'linewidth', 3)
+    scatter(waypoints(:,1), waypoints(:,2), 'filled')
+    
+%     print(gcf,'RRTstar_waypoints.png','-dpng','-r300'); % UNCOMMENT TO SAVE HIGH RESOLUTION
 else
     title('A plot of the polynomial trajectory with segments having polynomial order ' + string(polyOrder))
     for i=1:length(waypoints)-1
@@ -21,7 +23,7 @@ else
     end
     scatter(waypoints(:,1),waypoints(:,2), 'linewidth', 1.5)
     
-    print(gcf,'FinalTraj.png','-dpng','-r300'); % UNCOMMENT TO SAVE HIGH RESOLUTION
+%     print(gcf,'FinalTraj.png','-dpng','-r300'); % UNCOMMENT TO SAVE HIGH RESOLUTION
     
     %% Scatter of trajectory points to show quadrotor speed
     figure('Renderer', 'painters', 'Position', [1920/2 50 1920/3 900])
