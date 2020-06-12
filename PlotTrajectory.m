@@ -41,4 +41,6 @@ end
 xlim([0 10])
 ylim([0 18])
 
+% print(gcf,'RRTstar_waypoints.png','-dpng','-r300'); % UNCOMMENT TO SAVE HIGH RESOLUTION
+
 end

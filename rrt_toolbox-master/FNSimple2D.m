@@ -911,7 +911,7 @@ classdef FNSimple2D < handle
             end
             backtrace_path(path_iter) = current_index;
 %             close all;
-            figure;
+            figure('Renderer', 'painters', 'Position', [1920/2 50 1920/3 900])
             set(gcf(), 'Renderer', 'opengl');
             hold on;
             % obstacle drawing
@@ -923,7 +923,7 @@ classdef FNSimple2D < handle
             end
             
             drawn_nodes = zeros(1, this.nodes_added);
-            for ind = this.nodes_added:-1:1;
+            for ind = this.nodes_added:-1:1
                 if(sum(this.free_nodes(1:this.free_nodes_ind) == ind)>0)
                     continue;
                 end
@@ -941,8 +941,19 @@ classdef FNSimple2D < handle
                 end
             end
             plot(this.tree(1,backtrace_path), this.tree(2,backtrace_path),'*b-','LineWidth', 2);
-            this.plot_circle(this.goal_point(1), this.goal_point(2), this.delta_goal_point);
-            axis(this.XY_BOUNDARY);
+%             this.plot_circle(this.goal_point(1), this.goal_point(2), this.delta_goal_point);
+%             axis(this.XY_BOUNDARY);
+            
+            goal = fill([7.8 7.8 10 10 7.8], [15.8 18 18 15.8 15.8], 'm');  % This includes the 0.2 tolerance to the goal
+            set(goal, 'facealpha', 0.5)
+            set(goal, 'edgealpha', 0)
+            xlim([0 10])
+            ylim([0 18])
+            set(gcf,'Color','w') % Set background color to white %
+            set(gca,'Color','none')
+            
+%             print(gcf,'RRTstar_line.png','-dpng','-r300'); % UNCOMMENT TO SAVE HIGH RESOLUTION
+            
             disp(num2str(this.cumcost(backtrace_path(1))));
         end
         
@@ -976,7 +987,7 @@ classdef FNSimple2D < handle
             end
             backtrace_path(path_iter) = current_index;
 %             close all;
-            figure;
+            figure('Renderer', 'painters', 'Position', [1920/2 50 1920/3 900])
             set(gcf(), 'Renderer', 'opengl');
             hold on;
             
@@ -1029,8 +1040,17 @@ classdef FNSimple2D < handle
             
             plot(sol(1,:), sol(2,:),'b-','LineWidth', 2);
 %             scatter(this.tree(1,backtrace_path), this.tree(2,backtrace_path), 'b', 'filled')
-            this.plot_circle(this.goal_point(1), this.goal_point(2), this.delta_goal_point);
-            axis(this.XY_BOUNDARY);
+%             this.plot_circle(this.goal_point(1), this.goal_point(2), this.delta_goal_point);
+            goal = fill([7.8 7.8 10 10 7.8], [15.8 18 18 15.8 15.8], 'm');  % This includes the 0.2 tolerance to the goal
+            set(goal, 'facealpha', 0.5)
+            set(goal, 'edgealpha', 0)
+            xlim([0 10])
+            ylim([0 18])
+            set(gcf,'Color','w') % Set background color to white %
+            set(gca,'Color','none')
+            
+%             print(gcf,'RRTstar_poly.png','-dpng','-r300'); % UNCOMMENT TO SAVE HIGH RESOLUTION
+%             axis(this.XY_BOUNDARY);
             disp(num2str(this.cumcost(backtrace_path(1))));
         end
         
@@ -1070,7 +1090,7 @@ classdef FNSimple2D < handle
             hold on;
             
             drawn_nodes = zeros(1, this.nodes_added);
-            for ind = this.nodes_added:-1:1;
+            for ind = this.nodes_added:-1:1
                 if(sum(this.free_nodes(1:this.free_nodes_ind) == ind)>0)
                     continue;
                 end
