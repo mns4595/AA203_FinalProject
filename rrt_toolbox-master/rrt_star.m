@@ -86,9 +86,12 @@ if poly_steer
 end
 for ind = 1:MAX_ITER
     new_node = problem.sample();
+%     if (mod(ind, 1000) == 0) && ind ~= 1
+%         new_node = transpose(problem.goal_point);
+%     end
     if poly_steer
-        nearest_node_ind = problem.poly_nearest(new_node, deg);
-        new_node = problem.poly_steer(nearest_node_ind, new_node, deg);   % if new node is very distant from the nearest node we go from the nearest node in the direction of a new node
+        nearest_node_ind = problem.nearest(new_node);
+        new_node = problem.poly_steer(nearest_node_ind, new_node);   % if new node is very distant from the nearest node we go from the nearest node in the direction of a new node
     else
         nearest_node_ind = problem.nearest(new_node);
         new_node = problem.steer(nearest_node_ind, new_node);   % if new node is very distant from the nearest node we go from the nearest node in the direction of a new node
@@ -99,6 +102,7 @@ for ind = 1:MAX_ITER
         min_node_ind = problem.chooseParent(neighbors, nearest_node_ind, new_node);
         new_node_ind = problem.insert_node(min_node_ind, new_node);
         problem.rewire(new_node_ind, neighbors, min_node_ind);
+        problem.set_heading(new_node_ind);
     end
     
     if is_benchmark && (mod(ind, benchmark_record_step) == 0)

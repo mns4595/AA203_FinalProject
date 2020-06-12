@@ -2,6 +2,7 @@ classdef FNSimple2D < handle
     properties (SetAccess = private)
         tree                % Array stores position information of states
         parent              % Array stores relations of nodes
+        heading             % Direction of incoming polynomial at node (ADDED)
         children            % Number of children of each node
         free_nodes          % Indices of free nodes
         free_nodes_ind      % Last element in free_nodes
@@ -42,6 +43,7 @@ classdef FNSimple2D < handle
             rng(rand_seed);
             this.tree = zeros(2, max_nodes);
             this.parent = zeros(1, max_nodes);
+            this.heading = zeros(1, max_nodes);     % ADDED
             this.children = zeros(1, max_nodes);
             this.free_nodes = zeros(1, max_nodes);
             this.free_nodes_ind = 1;
@@ -208,11 +210,12 @@ classdef FNSimple2D < handle
             node_index = nbors(this.index(1));
         end
         
-        function node_index = poly_nearest(this, new_node_position, deg)
+        function node_index = poly_nearest(this, new_node_position)
             min = inf;
             
             for i = 1:length(this.tree(1,:))
-                dist = arcLength(this.tree(:, i), new_node_position, i, deg);
+                [~, Px, Py] = poly_sample(this, i, new_node_position);
+                dist = arcLength(this, Px, Py);
                 
                 if dist < min
                     min = dist;
@@ -233,24 +236,165 @@ classdef FNSimple2D < handle
             end
         end
         
-        function position = poly_steer(this, nearest_node, new_node_position, deg)
-            temp_length = arcLength(nearest_node, new_node_position, deg);
+        function position = poly_steer(this, nearest_node, new_node_position) % nearest_node is an index, new_node_position are coordinate
+            [poly_path, Px, Py] = poly_sample(this, nearest_node, new_node_position);
+            
+            temp_length = arcLength(this, Px, Py);
             
             % if new node is very distant from the nearest node we go from the nearest node in the direction of a new node
             if(temp_length > this.max_step)
-                poly_path = poly_sample(nearest_node, new_node_position, deg);
-                position = poly_path(:,1);
+                position = poly_path(:,3);
+                if position(1) < 0
+                    position(1) = 0.01;
+                end
+                if position(2) < 0
+                    position(2) = 0.01;
+                end
             else
                 position = new_node_position;
             end
         end
         
-        function poly_path = poly_sample(this, nearest_node, new_node_position, deg)
+        function [poly_path, Px, Py] = poly_sample(this, nearest_node, new_node_position) % nearest_node is an index, new_node_position are coordinate
+            %%%%%%%%%% Tunable Parameters %%%%%%%%%%
+            resolution = 15;           
+            V0 = 0.5;
+            V1 = 0.5;
+            t0 = 0; % Must leave at 0 if want to use current coefficient equations
+            tf = 1;
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
+            parent_coord = this.tree(:,nearest_node);
+            
+            x_p = parent_coord(1);
+            y_p = parent_coord(2);
+            
+            x_c = new_node_position(1);
+            y_c = new_node_position(2);
+            
+            check = true;
+            
+            if nearest_node == 1
+                th0 = atan2(y_c - y_p, x_c - x_p);
+                th1 = th0;
+                
+                this.heading(1) = th0;
+            elseif this.parent(nearest_node) == 0
+                check = false;
+                poly_path = 0;
+                Px = -1;
+                Py = -1;
+            else
+%                 grandpa_coord = this.tree(:, this.parent(nearest_node));
+%                 x_gp = grandpa_coord(1);
+%                 y_gp = grandpa_coord(2);
+                
+                th0 = this.heading(nearest_node); % atan2(y_p - y_gp, x_p - x_gp);
+                th1 = atan2(y_c - y_p, x_c - x_p);
+            end
+            
+            if check
+                x1 = x_p;
+                x2 = V0*cos(th0);
+                x4 = 1/(2*tf^2)*( V1*cos(th1) - x2 - 2*(x_c - x1 - x2*tf)/tf );
+                x3 = (x_c - x1 - x2*tf - x4*tf^3)/tf^2;
+
+                y1 = y_p;
+                y2 = V0*sin(th0);
+                y4 = 1/(2*tf^2)*( V1*sin(th1) - y2 - 2*(y_c - y1 - y2*tf)/tf );
+                y3 = (y_c - y1 - y2*tf - y4*tf^3)/tf^2;
+
+                Px = [x4 x3 x2 x1];
+                Py = [y4 y3 y2 y1];
+
+                t = linspace(t0, tf, resolution);
+                X = polyval(Px, t);
+                Y = polyval(Py, t);
+
+                poly_path = cat(1, X, Y); 
+            end
         end
         
-        function s = arcLength(this, x1, x2, index, deg)
+        function set_heading(this, new_node_ind)
+            node = this.tree(:, new_node_ind);
+            node_parent = this.tree(:, this.parent(new_node_ind));
             
+            this.heading(new_node_ind) = atan2(node(2) - node_parent(2), node(1) - node_parent(1));
+        end
+        
+        function s = arcLength(this, Px, Py)
+            if length(Px) == 4 && length(Py) == 4
+                %%%%%%%%%% Tunable Parameters %%%%%%%%%%
+                     %%% MUST MATCH poly_sample %%%
+                t0 = 0;
+                tf = 1;
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                resolution = 50;           
+
+                Pdx = Px(1:end-1);
+                Pdy = Py(1:end-1);
+
+                t = linspace(t0, tf, resolution);
+                dX = polyval(Pdx, t);
+                dY = polyval(Pdy, t);
+
+                integrand = sqrt(dX.^2 + dY.^2);
+
+                s = trapz(t, integrand);
+            else
+                s = inf;
+            end
+        end
+        
+        function poly_path = poly_pt_sample(this, xy1, xy2) % nearest_node is an index, new_node_position are coordinate
+            %%%%%%%%%% Tunable Parameters %%%%%%%%%%
+            resolution = 15;           
+            V0 = 0.5;
+            V1 = 0.5;
+            t0 = 0; % Must leave at 0 if want to use current coefficient equations
+            tf = 5;
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+            x_p = xy1(1);
+            y_p = xy1(2);
+            
+            x_c = xy2(1);
+            y_c = xy2(2);
+            
+            check = true;
+            
+            if x_p == 0.5 && y_p == 0.5
+                th0 = atan2(y_c - y_p, x_c - x_p);
+                th1 = th0;
+            else
+                grandpa_coord = this.tree(:, this.parent(nearest_node));
+                x_gp = grandpa_coord(1);
+                y_gp = grandpa_coord(2);
+                
+                th0 = atan2(y_p - y_gp, x_p - x_gp);
+                th1 = atan2(y_c - y_p, x_c - x_p);
+            end
+            
+            if check
+                x1 = x_p;
+                x2 = V0*cos(th0);
+                x4 = 1/(2*tf^2)*( V1*cos(th1) - x2 - 2*(x_c - x1 - x2*tf)/tf );
+                x3 = (x_c - x1 - x2*tf - x4*tf^3)/tf^2;
+
+                y1 = y_p;
+                y2 = V0*sin(th0);
+                y4 = 1/(2*tf^2)*( V1*sin(th1) - y2 - 2*(y_c - y1 - y2*tf)/tf );
+                y3 = (y_c - y1 - y2*tf - y4*tf^3)/tf^2;
+
+                Px = [x4 x3 x2 x1];
+                Py = [y4 y3 y2 y1];
+
+                t = linspace(t0, tf, resolution);
+                X = polyval(Px, t);
+                Y = polyval(Py, t);
+
+                poly_path = cat(1, X, Y); 
+            end
         end
         
         function load_map(this, map_name)
@@ -300,6 +444,17 @@ classdef FNSimple2D < handle
                         collision = true;
                         return;
                     end
+                end
+            end
+            
+            bound = [0, 0; 10, 0; 10, 20; 0, 20; 0,0];
+            for j = 1:length(bound) - 1
+                lp1 = bound(j,:);
+                lp2 = bound(j+1,:);
+
+                if ccw(p, lp1, lp2) ~= ccw(c, lp1, lp2) && ccw(p, c, lp1) ~= ccw(p, c, lp2)
+                    collision = true;
+                    return;
                 end
             end
 
@@ -446,9 +601,17 @@ classdef FNSimple2D < handle
             x_comp = int32(new_node_position(1) / this.bin_size - 0.5);
             y_comp = int32(new_node_position(2) / this.bin_size - 0.5);
             
+%             if new_node_position(1) < 0.1 || new_node_position(2) < 0.1
+%                 disp('here')
+%             end
+            
             cur_bin = x_comp + y_comp*this.bin_x + this.bin_offset;
             
-            num_nbors = this.bin(cur_bin).last;
+            try
+                num_nbors = this.bin(cur_bin).last;
+            catch
+                num_nbors = 0;
+            end
             
             if num_nbors < 20
                 nbors = 1:this.nodes_added;
@@ -778,6 +941,94 @@ classdef FNSimple2D < handle
                 end
             end
             plot(this.tree(1,backtrace_path), this.tree(2,backtrace_path),'*b-','LineWidth', 2);
+            this.plot_circle(this.goal_point(1), this.goal_point(2), this.delta_goal_point);
+            axis(this.XY_BOUNDARY);
+            disp(num2str(this.cumcost(backtrace_path(1))));
+        end
+        
+        function poly_plot(this)
+            %%% Find the optimal path to the goal
+            % finding all the point which are in the desired region
+            distances = zeros(this.nodes_added, 2);
+            distances(:, 1) = sum((this.tree(:,1:(this.nodes_added)) - repmat(this.goal_point', 1, this.nodes_added)).^2);
+            distances(:, 2) = 1:this.nodes_added;
+            distances = sortrows(distances, 1);
+            distances(:, 1) = distances(:, 1) <= this.delta_goal_point ^ 2;
+            dist_index = numel(find(distances(:, 1) == 1));
+            % find the cheapest path
+            if(dist_index ~= 0)
+                distances(:, 1) = this.cumcost(int32(distances(:, 2)));
+                distances = distances(1:dist_index, :);
+                distances = sortrows(distances, 1);
+                nearest_node_index = distances(1,2);
+            else
+                disp('NOTICE! Robot cannot reach the goal');
+                nearest_node_index = distances(1,2);
+            end
+            % backtracing the path
+            current_index = nearest_node_index;
+            path_iter = 1;
+            backtrace_path = zeros(1,1);
+            while(current_index ~= 1)
+                backtrace_path(path_iter) = current_index;
+                path_iter = path_iter + 1;
+                current_index = this.parent(current_index);
+            end
+            backtrace_path(path_iter) = current_index;
+%             close all;
+            figure;
+            set(gcf(), 'Renderer', 'opengl');
+            hold on;
+            
+            drawn_nodes = zeros(1, this.nodes_added);
+            for ind = this.nodes_added:-1:1
+                if(sum(this.free_nodes(1:this.free_nodes_ind) == ind)>0)
+                    continue;
+                end
+                current_index = ind;
+                while(current_index ~= 1 && current_index ~= -1)
+                    % avoid drawing same nodes twice or more times
+                    if(drawn_nodes(current_index) == false || drawn_nodes(this.parent(current_index)) == false)
+                        parent_index = this.parent(current_index);
+                        xy_child = [this.tree(1, current_index);this.tree(2, current_index)];
+                        
+                        [poly_path, ~, ~] = poly_sample(this, parent_index, xy_child);
+                        
+                        plot(poly_path(1,:), poly_path(2,:),'g-','LineWidth', 0.5);
+                        
+                        plot([this.tree(1,current_index);this.tree(1, this.parent(current_index))], ...
+                            [this.tree(2, current_index);this.tree(2, this.parent(current_index))],'.c');
+                        
+                        drawn_nodes(current_index) = true;
+                    end
+                    current_index = this.parent(current_index);
+                end
+            end
+            
+            % obstacle drawing
+            for k = 1:this.obstacle.num
+                p2 = fill(this.obstacle.output{k}(1:end, 1), this.obstacle.output{k}(1:end, 2), 'r');
+                set(p2,'HandleVisibility','off','EdgeAlpha',0);
+                %this.plot_circle(this.obstacle.cir_center{k}(1),this.obstacle.cir_center{k}(2), this.obstacle.r(k));
+                set(p2,'HandleVisibility','off','EdgeAlpha',0);
+            end
+            
+            bp = flip(backtrace_path);
+            X = this.tree(1,bp);
+            Y = this.tree(2,bp);
+            XY = cat(1, X, Y);
+            XY = XY(:,2:end);
+            
+            sol = [];
+            
+            for idx = 1:length(XY)
+                [segment, ~, ~] = poly_sample(this, bp(idx), XY(:,idx));
+                
+                sol = cat(2, sol, segment);
+            end
+            
+            plot(sol(1,:), sol(2,:),'b-','LineWidth', 2);
+%             scatter(this.tree(1,backtrace_path), this.tree(2,backtrace_path), 'b', 'filled')
             this.plot_circle(this.goal_point(1), this.goal_point(2), this.delta_goal_point);
             axis(this.XY_BOUNDARY);
             disp(num2str(this.cumcost(backtrace_path(1))));

@@ -83,11 +83,13 @@ end
 
 %% Polynomial Steer Function
 poly_steer = true;
+max_iter = 10000;   % 10000
+rand_seed = 20;     % 16
 
 if poly_steer
     result_poly = rrt_star(map, max_iter, is_benchmark, rand_seed, variant, poly_steer);
 end
-
+result_poly.poly_plot()
 %% Initial Polynomial Fit
 polyOrder = 9;
 iteration = 1;
